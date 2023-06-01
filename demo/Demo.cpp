@@ -1,5 +1,6 @@
 #include <opencv2\opencv.hpp>
-#include ".././include/Stitching360.h"
+// #include ".././include/Stitching360.h"
+# include "./include/Stitching360.h"
 #include <fstream>
 
 #pragma comment(lib,"360Stitching.lib")
@@ -20,7 +21,7 @@ void OnMouseAction(int event, int x, int y, int flags, void *para)
 
 int main()
 {
-    /****************************************Í¼Æ¬½ÃÕý***************************************************/
+    /****************************************Í¼Æ¬ï¿½ï¿½ï¿½ï¿½***************************************************/
     cv::Mat mSrcFront = cv::imread("..\\..\\..\\inputImg\\front.png");
     cv::Mat mSrcBack = cv::imread("..\\..\\..\\inputImg\\back.png");
     cv::Mat mSrcLeft = cv::imread("..\\..\\..\\inputImg\\left.png");
@@ -53,8 +54,8 @@ int main()
     cv::cuda::GpuMat cmDistortionRight = stitching360->Undistort(cmDstImageRight);
     cmDistortionRight.download(mDstRight);
 
-    /***************************************Í¶Ó°±ä»»*****************************************************/
-    // ×ó²à
+    /***************************************Í¶Ó°ï¿½ä»»*****************************************************/
+    // ï¿½ï¿½ï¿½
     cv::Point2f pSrcPointsLeft[] =
     {
         cv::Point2f(797, 696),// C->D
@@ -73,7 +74,7 @@ int main()
     };
     cv::Mat mPerspectiveLeft = stitching360->PerspectiveTransform(mDstLeft, pSrcPointsLeft, pDstPointsLeft, cv::Size(1080, 500), left);
 
-    // ÓÒ²à
+    // ï¿½Ò²ï¿½
     cv::Point2f pSrcPointsRight[] =
     {
         cv::Point2f(739, 692),// C->D
@@ -91,7 +92,7 @@ int main()
     };
     cv::Mat mPerspectiveRight = stitching360->PerspectiveTransform(mDstRight, pSrcPointsRight, mDstPointsRight, cv::Size(1080, 500), right);
 
-    // Ç°·½
+    // Ç°ï¿½ï¿½
     cv::Point2f mSrcPointsFront[] =
     {
         cv::Point2f(645, 666),// C->D
@@ -109,7 +110,7 @@ int main()
     };
     cv::Mat mPerspectiveFront = stitching360->PerspectiveTransform(mDstFront, mSrcPointsFront, mDstPointsFront, cv::Size(1080, 500), front);
 
-    // ºó·½
+    // ï¿½ï¿½
     cv::Point2f pSrcPointsBack[] =
     {
         cv::Point2f(566, 686),
@@ -127,13 +128,13 @@ int main()
     };
     cv::Mat mPerspectiveBack = stitching360->PerspectiveTransform(mDstBack, pSrcPointsBack, pDstPointsBack, cv::Size(1080, 500), back);
 
-    /**************************************Æ´½Ó******************************************************/
+    /**************************************Æ´ï¿½ï¿½******************************************************/
     std::vector<cv::Point> vPstFront;
     std::vector<cv::Point> vPtsBack;
     std::vector<cv::Point> vPtsLeft;
     std::vector<cv::Point> vPtsRight;
 
-    // front Ñ¡µã
+    // front Ñ¡ï¿½ï¿½
     cv::imshow("front", mPerspectiveFront);
     cv::waitKey(1);
     while (1)
@@ -147,7 +148,7 @@ int main()
     vecTemp.clear();
     cv::destroyWindow("front");
 
-    // rightÑ¡µã
+    // rightÑ¡ï¿½ï¿½
     cv::imshow("right", mPerspectiveRight);
     cv::waitKey(1);
     while (1)
@@ -161,7 +162,7 @@ int main()
     vecTemp.clear();
     cv::destroyWindow("right");
 
-    // backÑ¡µã
+    // backÑ¡ï¿½ï¿½
     cv::imshow("back", mPerspectiveBack);
     cv::waitKey(1);
     while (1)
@@ -175,7 +176,7 @@ int main()
     vecTemp.clear();
     cv::destroyWindow("back");
 
-    // leftÑ¡µã
+    // leftÑ¡ï¿½ï¿½
     cv::imshow("left", mPerspectiveLeft);
     cv::waitKey(1);
     while (1)

@@ -1,56 +1,22 @@
 #define _DLL_EXPORTS
 #include ".././include/Stitching360.h"
+// #include </usr/local/include/opencv4/opencv2/imgproc/types_c.h>
+// #include <opencv2\imgproc\types_c.h>
+#include <opencv2/imgproc/types_c.h>
 #define front 0
 #define back 1
 #define left 2
 #define right 3
 
-class Stitching360 :public SurroundView
-{
-private:
-    std::string                             m_sImageRoot;	/* Í¼Æ¬ÎÄ¼ş¼Ğ */
-    std::string                             m_sLastName;    /* Í¼Æ¬ºó×ºÃû */
-    std::string                             m_sCaliResult; /* ´æ±ê¶¨Êı¾İµÄÎÄ¼şÃû*/
-    cv::Size                                m_szImage;
-    cv::Size                                m_szBoard;	/****    ¶¨±ê°åÉÏÃ¿ĞĞ¡¢ÁĞµÄ½ÇµãÊı       ****/
-    int                                     m_nImageCount;	/****    ±ê¶¨Í¼ÏñÊıÁ¿     ****/
-    int                                     m_nSuccessImageNum;                /****   ³É¹¦ÌáÈ¡½ÇµãµÄÆåÅÌÍ¼ÊıÁ¿    ****/
-    cv::Matx33d                             m_mIntrinsicMatrix;    /*****    ÉãÏñ»úÄÚ²ÎÊı¾ØÕó    ****/
-    cv::Matx33d                             m_mNewIntrinsicMat;   /** ÉãÏñÍ·ĞÂµÄÄÚ²ÎÓÃÓÚ½ÃÕı **/
-    cv::Vec4d                               m_vDistortionCoeffs;     /* ÉãÏñ»úµÄ4¸ö»û±äÏµÊı£ºk1,k2,k3,k4*/
-    std::vector<cv::Mat>                    m_vImageSeq;					/* ±£´æÍ¼Ïñ */
-    std::vector<std::vector<cv::Point2f>>   m_vCornersSeq;    /****  ±£´æ¼ì²âµ½µÄËùÓĞ½Çµã       ****/
-    std::vector<cv::Point2f>                n_vCorners;                  /****    »º´æÃ¿·ùÍ¼ÏñÉÏ¼ì²âµ½µÄ½Çµã       ****/
-    std::vector<cv::Vec3d>                  m_vRotationVectors;                           /* Ã¿·ùÍ¼ÏñµÄĞı×ªÏòÁ¿ */
-    std::vector<cv::Vec3d>                  m_vTranslationVectors;                        /* Ã¿·ùÍ¼ÏñµÄÆ½ÒÆÏòÁ¿ */
-    cv::cuda::GpuMat                        m_cmMap1; /* ×îÖÕ½ÃÕıµÄÓ³Éä±í */
-    cv::cuda::GpuMat                        m_cmMap2; /* ×îÖÕ½ÃÕıµÄÓ³Éä±í */
+// Stitching360::Stitching360():m_sImageRoot("..\\..\\..\\CaliImg\\"), m_sLastName(".png"), m_sCaliResult("..\\..\\..\\src\\result.txt"), m_szBoard(cv::Size(7, 7)), m_nImageCount(15), m_nSuccessImageNum(0)
+// {
+// }
 
-    int findCorners();
-    int cameraCalibrate(int count);
-    int savePara();
-    void OnMouseAction(int event, int x, int y, int flags, void *para);
+Stitching360::Stitching360():m_sImageRoot(".././CaliImg/"), m_sLastName(".png"), m_sCaliResult("..\\..\\..\\src\\result.txt"), m_szBoard(cv::Size(7, 7)), m_nImageCount(15), m_nSuccessImageNum(0)
+{ 
 
-
-public:
-    Stitching360();
-    ~Stitching360();
-    /************************Ïà»ú±ê¶¨ÒÔ¼°½ÃÕı****************************/
-    virtual int Init(int nSrcHeight, int nSrcWidth);
-    virtual cv::cuda::GpuMat Undistort(cv::cuda::GpuMat &mSrcImg);
-
-    /************************ÄæÍ¶Ó°±ä»»*******************************/
-    virtual cv::Mat PerspectiveTransform(cv::InputArray aInput, cv::Point2f *pSrcPoints, cv::Point2f *pDstPoints, cv::Size sOutputSize, int nOrientation);
-
-    /*************************Í¼ÏñÆ´½Ó**********************************/
-    virtual cv::Mat ImageStitching(int nWidth, int nHeight, cv::Mat aInputLeft, cv::Mat aInputRight, cv::Mat aInputFront, cv::Mat aInputBack,
-        std::vector<cv::Point> vPtsInputLeft, std::vector<cv::Point> vPtsInputRight, std::vector<cv::Point> vPtsInputFront, std::vector<cv::Point> vPtsInputBack);
-
-};
-
-Stitching360::Stitching360():m_sImageRoot("..\\..\\..\\CaliImg\\"), m_sLastName(".png"), m_sCaliResult("..\\..\\..\\src\\result.txt"), m_szBoard(cv::Size(7, 7)), m_nImageCount(15), m_nSuccessImageNum(0)
-{
 }
+
 
 Stitching360::~Stitching360() 
 {
@@ -60,6 +26,7 @@ Stitching360::~Stitching360()
 int Stitching360::Init(int nSrcHeight, int nSrcWidth)
 {
 	bool isExist = std::experimental::filesystem::exists(m_sCaliResult);
+    // bool isExist = std::filesystem::exists(m_sCaliResult);
 	m_szImage = cv::Size(nSrcHeight, nSrcWidth);
 	if (!isExist) 
 	{
@@ -72,7 +39,7 @@ int Stitching360::Init(int nSrcHeight, int nSrcWidth)
 		std::ifstream fin(m_sCaliResult);
 		float d;
 		int i = 0;
-		// ÕâÀï»¹Òª´¦ÀíÒ»ÏÂ¶ÁÈëµÄ·½Ê½
+		// Here we also need to deal with the way of reading
 		while (fin >> d) {
 			if (i <= 8)
 				m_mIntrinsicMatrix(i / 3, i % 3) = d;
@@ -102,22 +69,22 @@ int Stitching360::findCorners()
 		StrStm >> imageFileName;
 		imageFileName += m_sLastName;
 		cv::Mat image = cv::imread(m_sImageRoot + imageFileName);
-		/* ÌáÈ¡½Çµã */
+		/* Extract corner points */
 		cv::Mat imageGray;
 		cvtColor(image, imageGray, CV_RGB2GRAY);
-		/*ÊäÈëÍ¼Ïñ£¬½ÇµãÊı£¬¼ì²âµ½µÄ½Çµã£¬Ñ°ÕÒ½ÇµãÇ°¶ÔÍ¼Ïñ×öµÄµ÷Õû*/
+		/*Input image, number of corners, detected corners, adjustments made to the image before finding corners*/
 		bool patternfound = cv::findChessboardCorners(image, m_szBoard, n_vCorners, cv::CALIB_CB_ADAPTIVE_THRESH + cv::CALIB_CB_NORMALIZE_IMAGE +
 			cv::CALIB_CB_FAST_CHECK);
 
 		if (!patternfound)
 		{
-            std::cout << "ÕÒ²»µ½½Çµã£¬ĞèÉ¾³ıÍ¼Æ¬ÎÄ¼ş" << imageFileName << "ÖØĞÂÅÅÁĞÎÄ¼şÃû£¬ÔÙ´Î±ê¶¨" << std::endl;
+            std::cout << "Corner not found, need to delete image file" << imageFileName << "Rearrange the filenames and recalibrate" << std::endl;
 			getchar();
 			exit(1);
 		}
 		else
 		{
-			/* ÑÇÏñËØ¾«È·»¯,¶Ô¼ì²âµ½µÄÕûÊı×ø±ê½Çµã¾«È·»¯£¬¾«È·»¯ºóµÄµã´æÔÚcornersÖĞ£¬ ×îĞ¡¶ş³Ëµü´ú100´Î£¬Îó²îÔÚ0.001*/
+			/* Sub-pixel precision, refine the detected integer coordinate corner points, the refined points are stored in corners, the least square iteration is 100 times, the error is 0.001*/
 			cornerSubPix(imageGray, n_vCorners, cv::Size(11, 11), cv::Size(-1, -1), cv::TermCriteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 100, 0.001));
             std::cout << "Frame corner#" << i + 1 << "...end" << std::endl;
 
@@ -128,18 +95,18 @@ int Stitching360::findCorners()
 		m_vImageSeq.push_back(image);
 	}
 	return count;
-    std::cout << "½ÇµãÌáÈ¡Íê³É£¡\n";
+    std::cout << "Corner point extraction complete!\n";
     return 1;
 }
 
 int Stitching360::cameraCalibrate(int count) {
-    std::cout << "¿ªÊ¼¶¨±ê¡­¡­¡­¡­¡­¡­" << std::endl;
-	cv::Size square_size = cv::Size(20, 20); /**** Ã¿Ò»¸ö¸ñ×ÓÊÇ20m*20mm ****/
-    std::vector<std::vector<cv::Point3f>>  object_Points;        /****  ±£´æ¶¨±ê°åÉÏ½ÇµãµÄÈıÎ¬×ø±ê   ****/
+    std::cout << "Start calibrationâ€¦â€¦â€¦â€¦â€¦" << std::endl;
+	cv::Size square_size = cv::Size(20, 20); /**** Each grid is 20m*20mm ****/
+    std::vector<std::vector<cv::Point3f>>  object_Points; /**** Save the three-dimensional coordinates of the corner points on the calibration board ****/
 
-	cv::Mat image_points = cv::Mat(1, count, CV_32FC2, cv::Scalar::all(0));  /*****   ±£´æÌáÈ¡µÄËùÓĞ½Çµã   *****/
+	cv::Mat image_points = cv::Mat(1, count, CV_32FC2, cv::Scalar::all(0));  /***** Save all extracted corners *****/
     std::vector<int>  point_counts;
-	/* ³õÊ¼»¯¶¨±ê°åÉÏ½ÇµãµÄÈıÎ¬×ø±ê */
+	/* Initialize the three-dimensional coordinates of the corner points on the calibration board */
 	for (int t = 0; t<m_nSuccessImageNum; t++)
 	{
         std::vector<cv::Point3f> tempPointSet;
@@ -147,7 +114,7 @@ int Stitching360::cameraCalibrate(int count) {
 		{
 			for (int j = 0; j<m_szBoard.width; j++)
 			{
-				/* ¼ÙÉè¶¨±ê°å·ÅÔÚÊÀ½ç×ø±êÏµÖĞz=0µÄÆ½ÃæÉÏ */
+				/* Assume that the calibration board is placed on the plane of z=0 in the world coordinate system */
 				cv::Point3f tempPoint;
 				tempPoint.x = i*square_size.width;
 				tempPoint.y = j*square_size.height;
@@ -161,31 +128,33 @@ int Stitching360::cameraCalibrate(int count) {
 	{
 		point_counts.push_back(m_szBoard.width*m_szBoard.height);
 	}
-	/* ¿ªÊ¼¶¨±ê */
+	/* start calibration */
 	cv::Size image_size = m_vImageSeq[0].size();
 	int flags = 0;
 	flags |= cv::fisheye::CALIB_RECOMPUTE_EXTRINSIC;
 	flags |= cv::fisheye::CALIB_CHECK_COND;
 	flags |= cv::fisheye::CALIB_FIX_SKEW;
-	/* ½ÇµãÔÚ±ê¶¨°åÄÚµÄ×ø±ê£¬ ½ÇµãÔÚÍ¼ÏñÖĞµÄ×ø±ê£¬ Í¼Æ¬´óĞ¡£¬ ÄÚ²Î¾ØÕó£¬ ËÄ¸ö»û±ä²ÎÊı£¬ Êä³öµÄĞı×ªÏòÁ¿£¬ Êä³öµÄÆ½ÒÆÏòÁ¿£¬ µü´ú´ÎÊı Îó²î*/
+	/* The coordinates of the corner points in the calibration board, the coordinates of the corner points in the image, 
+    the size of the image, the internal reference matrix, the four distortion parameters, the output rotation vector, 
+    the output translation vector, the number of iterations, the error*/
 	cv::fisheye::calibrate(object_Points, m_vCornersSeq, image_size, m_mIntrinsicMatrix, m_vDistortionCoeffs, m_vRotationVectors, m_vTranslationVectors, flags, cv::TermCriteria(3, 20, 1e-6));
 	cv::fisheye::estimateNewCameraMatrixForUndistortRectify(m_mIntrinsicMatrix, m_vDistortionCoeffs, image_size, cv::noArray(), m_mNewIntrinsicMat, 0.8, image_size, 1.0);
-    std::cout << "¶¨±êÍê³É£¡\n";
+    std::cout << "Calibration completed!\n";
     return 1;
 }
 
 int Stitching360::savePara() {
-    std::cout << "¿ªÊ¼±£´æ¶¨±ê½á¹û¡­¡­¡­¡­¡­¡­" << std::endl;
+    std::cout << "Start saving calibration results............." << std::endl;
     std::ofstream fout(m_sCaliResult);
-	/*Ïà»úÄÚ²ÎÊı¾ØÕó*/
+	/*Camera Intrinsic Parameter Matrix*/
     fout << m_mIntrinsicMatrix(0,0) << ' ' << m_mIntrinsicMatrix(0, 1) << ' ' << m_mIntrinsicMatrix(0, 2) << ' ' << m_mIntrinsicMatrix(1, 0) << ' ' << m_mIntrinsicMatrix(1, 1)
 		<< ' ' << m_mIntrinsicMatrix(1, 2) << ' ' << m_mIntrinsicMatrix(2, 0) << ' ' << m_mIntrinsicMatrix(2, 1) << ' ' << m_mIntrinsicMatrix(2, 2) << std::endl;
-	/*»û±äÏµÊı*/
+	/*Distortion coefficient*/
 	fout << m_vDistortionCoeffs(0) << ' '<< m_vDistortionCoeffs(1) <<' '<< m_vDistortionCoeffs(2) << ' ' << m_vDistortionCoeffs(3) << std::endl;
-	/*½ÃÕıÄÚ²Î¾ØÕó*/
+	/*Correction internal reference matrix*/
 	fout << m_mNewIntrinsicMat(0, 0) << ' ' << m_mNewIntrinsicMat(0, 1) << ' ' << m_mNewIntrinsicMat(0, 2) << ' ' << m_mNewIntrinsicMat(1, 0) << ' ' << m_mNewIntrinsicMat(1, 1)
 		<< ' ' << m_mNewIntrinsicMat(1, 2) << ' ' << m_mNewIntrinsicMat(2, 0) << ' ' << m_mNewIntrinsicMat(2, 1) << ' ' << m_mNewIntrinsicMat(2, 2) << std::endl;
-    std::cout << "Íê³É±£´æ" << std::endl;
+    std::cout << "saving done" << std::endl;
 	fout << std::endl;
     return 1;
 }
@@ -198,7 +167,8 @@ cv::cuda::GpuMat Stitching360::Undistort(cv::cuda::GpuMat &mSrcImg)
 	//cv::remap();
 	cv::cuda::GpuMat mDstImg;
 	//cv::remap(mSrcImg, mDstImg, map1, map2, INTER_LINEAR, BORDER_CONSTANT);
-	cv::cuda::remap(mSrcImg, mDstImg, m_cmMap1, m_cmMap2, cv::INTER_LINEAR, cv::BORDER_CONSTANT);
+	// cv::cuda::remap(mSrcImg, mDstImg, m_cmMap1, m_cmMap2, cv::INTER_LINEAR, cv::BORDER_CONSTANT);
+    cv::remap(mSrcImg, mDstImg, m_cmMap1, m_cmMap2, cv::INTER_LINEAR, cv::BORDER_CONSTANT);
 	return mDstImg;
 }
 
@@ -251,8 +221,8 @@ cv::Mat Stitching360::ImageStitching(int nWidth, int nHeight, cv::Mat mInputLeft
     cv::Mat mImgRoiInputLeft;
     cv::Mat mImgRoiInputRight;
 
-    /***********************************ÇĞ¸î**************************************************/
-    // frontÇĞ¸î
+    /***********************************ï¿½Ğ¸ï¿½**************************************************/
+    // frontï¿½Ğ¸ï¿½
     vStitchFront.push_back(cv::Point(vPtsFront.at(1).x - nHeight + vPtsFront.at(1).y, nHeight));
     vStitchFront.push_back(cv::Point(vPtsFront.at(0).x + nHeight - vPtsFront.at(0).y, nHeight));
     if (vPtsFront.at(0).x > vPtsFront.at(0).y)
@@ -274,7 +244,7 @@ cv::Mat Stitching360::ImageStitching(int nWidth, int nHeight, cv::Mat mInputLeft
         vStitchFront.push_back(cv::Point(nWidth, vPtsFront.at(1).y - nWidth + vPtsFront.at(1).x));
     }
 
-    // backÇĞ¸î
+    // backï¿½Ğ¸ï¿½
     vStitchBack.push_back(cv::Point(vPtsBack.at(1).x - vPtsBack.at(1).y, 0));
     vStitchBack.push_back(cv::Point(vPtsBack.at(0).x + vPtsBack.at(0).y, 0));
     if (nHeight - vPtsBack.at(0).y < vPtsBack.at(0).x)
@@ -297,7 +267,7 @@ cv::Mat Stitching360::ImageStitching(int nWidth, int nHeight, cv::Mat mInputLeft
     }
 
 
-    /*****************************¼ÆËã±ßÔµ************************************/
+    /*****************************ï¿½ï¿½ï¿½ï¿½ï¿½Ôµ************************************/
     int nDiffFL_x = vPtsLeft.at(0).x - vPtsFront.at(0).x;
     int nDiffBL_x = vPtsLeft.at(1).x - vPtsBack.at(0).x;
     if (nDiffFL_x < nDiffBL_x)
@@ -341,7 +311,7 @@ cv::Mat Stitching360::ImageStitching(int nWidth, int nHeight, cv::Mat mInputLeft
     vContourInputFront.push_back(vStitchFront);
     drawContours(mRoiInputFront, vContourInputFront, 0, cv::Scalar::all(255), -1);
     
-    // ÏÈ·ÅleftÓëright, ÒòÎªÃ»ÓĞÇĞ¸î. front ÓëbackÇĞ¸îÁË
+    // Put left and right first, because there is no cutting. Front and back are cut
     mInputRight.copyTo(mImgRoiInputRight);
     mInputLeft.copyTo(mImgRoiInputLeft);
     mInputFront.copyTo(mImgRoiInputFront, mRoiInputFront);
@@ -351,7 +321,7 @@ cv::Mat Stitching360::ImageStitching(int nWidth, int nHeight, cv::Mat mInputLeft
 }
 
 
-extern "C" DLL_API SurroundView *GetStitching()
-{
-    return new Stitching360;
-}
+// extern "C" DLL_API SurroundView *GetStitching()
+// {
+//     return new Stitching360;
+// }
