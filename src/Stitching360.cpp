@@ -1,16 +1,12 @@
 #define _DLL_EXPORTS
 #include ".././include/Stitching360.h"
-// #include </usr/local/include/opencv4/opencv2/imgproc/types_c.h>
-// #include <opencv2\imgproc\types_c.h>
 #include <opencv2/imgproc/types_c.h>
+#include "opencv2/core/cuda.hpp"
+#include "opencv2/imgproc.hpp"
 #define front 0
 #define back 1
 #define left 2
 #define right 3
-
-// Stitching360::Stitching360():m_sImageRoot("..\\..\\..\\CaliImg\\"), m_sLastName(".png"), m_sCaliResult("..\\..\\..\\src\\result.txt"), m_szBoard(cv::Size(7, 7)), m_nImageCount(15), m_nSuccessImageNum(0)
-// {
-// }
 
 Stitching360::Stitching360():m_sImageRoot(".././CaliImg/"), m_sLastName(".png"), m_sCaliResult("..\\..\\..\\src\\result.txt"), m_szBoard(cv::Size(7, 7)), m_nImageCount(15), m_nSuccessImageNum(0)
 { 
@@ -161,16 +157,21 @@ int Stitching360::savePara() {
 
 cv::cuda::GpuMat Stitching360::Undistort(cv::cuda::GpuMat &mSrcImg)
 {
-	//cv::Mat map1, map2;
-	//fisheye::initUndistortRectifyMap();
-	
-	//cv::remap();
-	cv::cuda::GpuMat mDstImg;
-	//cv::remap(mSrcImg, mDstImg, map1, map2, INTER_LINEAR, BORDER_CONSTANT);
-	// cv::cuda::remap(mSrcImg, mDstImg, m_cmMap1, m_cmMap2, cv::INTER_LINEAR, cv::BORDER_CONSTANT);
-    cv::remap(mSrcImg, mDstImg, m_cmMap1, m_cmMap2, cv::INTER_LINEAR, cv::BORDER_CONSTANT);
-	return mDstImg;
-}
+	cv::cuda::GpuMat mDstImg; 
+    cv::Mat mDstImg_, mSrcImg_, m_cmMap1_, m_cmMap2_;  
+
+    // to compute cv::remap, variables on GPU must be downloaded into CPU
+    mSrcImg.download(mSrcImg_);
+    m_cmMap1.download(m_cmMap1_);
+    m_cmMap2.download(m_cmMap2_);
+    
+    cv::remap(mSrcImg_, mDstImg_, m_cmMap1_, m_cmMap2_, cv::INTER_LINEAR, cv::BORDER_CONSTANT);
+
+    mDstImg.upload(mDstImg_);
+
+    return mDstImg;
+
+ }
 
 cv::Mat Stitching360::PerspectiveTransform(cv::InputArray aInput, cv::Point2f *pSrcPoints, cv::Point2f *pDstPoints, cv::Size sOutputSize, int nOrientation) 
 {
@@ -221,8 +222,8 @@ cv::Mat Stitching360::ImageStitching(int nWidth, int nHeight, cv::Mat mInputLeft
     cv::Mat mImgRoiInputLeft;
     cv::Mat mImgRoiInputRight;
 
-    /***********************************�и�**************************************************/
-    // front�и�
+    /***********************************to cut**************************************************/
+    // front cutting
     vStitchFront.push_back(cv::Point(vPtsFront.at(1).x - nHeight + vPtsFront.at(1).y, nHeight));
     vStitchFront.push_back(cv::Point(vPtsFront.at(0).x + nHeight - vPtsFront.at(0).y, nHeight));
     if (vPtsFront.at(0).x > vPtsFront.at(0).y)
@@ -244,7 +245,7 @@ cv::Mat Stitching360::ImageStitching(int nWidth, int nHeight, cv::Mat mInputLeft
         vStitchFront.push_back(cv::Point(nWidth, vPtsFront.at(1).y - nWidth + vPtsFront.at(1).x));
     }
 
-    // back�и�
+    // back cutting
     vStitchBack.push_back(cv::Point(vPtsBack.at(1).x - vPtsBack.at(1).y, 0));
     vStitchBack.push_back(cv::Point(vPtsBack.at(0).x + vPtsBack.at(0).y, 0));
     if (nHeight - vPtsBack.at(0).y < vPtsBack.at(0).x)
@@ -267,7 +268,7 @@ cv::Mat Stitching360::ImageStitching(int nWidth, int nHeight, cv::Mat mInputLeft
     }
 
 
-    /*****************************�����Ե************************************/
+    /*****************************computing edge************************************/
     int nDiffFL_x = vPtsLeft.at(0).x - vPtsFront.at(0).x;
     int nDiffBL_x = vPtsLeft.at(1).x - vPtsBack.at(0).x;
     if (nDiffFL_x < nDiffBL_x)

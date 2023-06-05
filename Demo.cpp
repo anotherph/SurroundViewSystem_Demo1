@@ -1,6 +1,3 @@
-// #include <opencv2\opencv.hpp>
-// #include ".././include/Stitching360.h"
-// #include </usr/local/include/opencv4/opencv2/opencv.hpp>
 #include <opencv2/opencv.hpp>
 #include "./include/Stitching360.h"
 #include <fstream>
@@ -24,19 +21,11 @@ void OnMouseAction(int event, int x, int y, int flags, void *para)
 
 int main()
 {
-    /****************************************ͼƬ����***************************************************/
-    // cv::Mat mSrcFront = cv::imread("..\\..\\..\\inputImg\\front.png");
-    // cv::Mat mSrcBack = cv::imread("..\\..\\..\\inputImg\\back.png");
-    // cv::Mat mSrcLeft = cv::imread("..\\..\\..\\inputImg\\left.png");
-    // cv::Mat mSrcRight = cv::imread("..\\..\\..\\inputImg\\right.png");
+    /****************************************picture correction***************************************************/
     cv::Mat mSrcFront = cv::imread(".././inputImg/front.png");
     cv::Mat mSrcBack = cv::imread(".././inputImg/back.png");
     cv::Mat mSrcLeft = cv::imread(".././inputImg/left.png");
     cv::Mat mSrcRight = cv::imread(".././inputImg/right.png");
-    // cv::Mat mSrcFront = cv::imread("./front.png");
-    // cv::Mat mSrcBack = cv::imread("./back.png");
-    // cv::Mat mSrcLeft = cv::imread("./left.png");
-    // cv::Mat mSrcRight = cv::imread("./right.png");
 
     cv::Mat mDstLeft;
     cv::Mat mDstRight;
@@ -68,8 +57,8 @@ int main()
     cmDistortionRight.download(mDstRight);
 
 
-    /***************************************ͶӰ�任*****************************************************/
-    // ���
+    /***************************************projection transformation*****************************************************/
+    // left side 
     cv::Point2f pSrcPointsLeft[] =
     {
         cv::Point2f(797, 696),// C->D
@@ -88,7 +77,7 @@ int main()
     };
     cv::Mat mPerspectiveLeft = stitching360->PerspectiveTransform(mDstLeft, pSrcPointsLeft, pDstPointsLeft, cv::Size(1080, 500), left);
 
-    // �Ҳ�
+    // right side
     cv::Point2f pSrcPointsRight[] =
     {
         cv::Point2f(739, 692),// C->D
@@ -106,7 +95,7 @@ int main()
     };
     cv::Mat mPerspectiveRight = stitching360->PerspectiveTransform(mDstRight, pSrcPointsRight, mDstPointsRight, cv::Size(1080, 500), right);
 
-    // ǰ��
+    // front (ahead)
     cv::Point2f mSrcPointsFront[] =
     {
         cv::Point2f(645, 666),// C->D
@@ -124,7 +113,7 @@ int main()
     };
     cv::Mat mPerspectiveFront = stitching360->PerspectiveTransform(mDstFront, mSrcPointsFront, mDstPointsFront, cv::Size(1080, 500), front);
 
-    // ��
+    // back (rear)
     cv::Point2f pSrcPointsBack[] =
     {
         cv::Point2f(566, 686),
@@ -142,13 +131,15 @@ int main()
     };
     cv::Mat mPerspectiveBack = stitching360->PerspectiveTransform(mDstBack, pSrcPointsBack, pDstPointsBack, cv::Size(1080, 500), back);
 
-    /**************************************ƴ��******************************************************/
+    /**************************************stitching******************************************************/
+    // To create a patch that can be stitched into a combined image, select two points in each image
+
     std::vector<cv::Point> vPstFront;
     std::vector<cv::Point> vPtsBack;
     std::vector<cv::Point> vPtsLeft;
     std::vector<cv::Point> vPtsRight;
 
-    // front ѡ��
+    // front point selection
     cv::imshow("front", mPerspectiveFront);
     cv::waitKey(1);
     while (1)
@@ -162,7 +153,7 @@ int main()
     vecTemp.clear();
     cv::destroyWindow("front");
 
-    // rightѡ��
+    // right point selection
     cv::imshow("right", mPerspectiveRight);
     cv::waitKey(1);
     while (1)
@@ -176,7 +167,7 @@ int main()
     vecTemp.clear();
     cv::destroyWindow("right");
 
-    // backѡ��
+    // back point selection
     cv::imshow("back", mPerspectiveBack);
     cv::waitKey(1);
     while (1)
@@ -190,7 +181,7 @@ int main()
     vecTemp.clear();
     cv::destroyWindow("back");
 
-    // leftѡ��
+    // left point selection
     cv::imshow("left", mPerspectiveLeft);
     cv::waitKey(1);
     while (1)
