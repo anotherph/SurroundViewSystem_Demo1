@@ -13,7 +13,6 @@ void OnMouseAction(int event, int x, int y, int flags, void *para)
 {
     switch (event)
     {
-    // case CV_EVENT_LBUTTONDOWN:
     case cv::EVENT_LBUTTONDOWN:
         vecTemp.push_back(cv::Point2d(x, y));
     }
@@ -74,8 +73,38 @@ int main()
         cv::Point2f(200 + 770, 150 + 250),
         cv::Point2f(200, 150 + 30),
         cv::Point2f(200 + 770, 150 + 30)
+
+        // cv::Point2f(0, 0 + 250),
+        // cv::Point2f(0 + 770, 0 + 250),
+        // cv::Point2f(0, 0 + 30),
+        // cv::Point2f(0 + 770, 0 + 30)
+
+        // cv::Point2f(0, 30),
+        // cv::Point2f(0 + 110, 0 +30),
+        // cv::Point2f(0, 0 ),
+        // cv::Point2f(0 + 110, 0 + 0)
     };
     cv::Mat mPerspectiveLeft = stitching360->PerspectiveTransform(mDstLeft, pSrcPointsLeft, pDstPointsLeft, cv::Size(1080, 500), left);
+    // cv::Mat mPerspectiveLeft = stitching360->PerspectiveTransform(mDstFront, pSrcPointsLeft, pDstPointsLeft, cv::Size(1500, 1000), left);
+
+    // // show the points on the image
+    // cv::Mat left_temp_bf;
+    // mDstLeft.copyTo(left_temp_bf);
+    // cv::Mat left_temp_af;
+    // mPerspectiveLeft.copyTo(left_temp_af);
+    
+    // cv::circle(left_temp_bf,pSrcPointsLeft[0],5,cv::Scalar(255,0,255),3,8,0);
+    // cv::circle(left_temp_bf,pSrcPointsLeft[1],5,cv::Scalar(255,0,255),3,8,0);
+    // cv::circle(left_temp_bf,pSrcPointsLeft[2],5,cv::Scalar(255,0,255),3,8,0);
+    // cv::circle(left_temp_bf,pSrcPointsLeft[3],5,cv::Scalar(255,0,255),3,8,0);
+    // cv::circle(left_temp_af,cv::Point(pDstPointsLeft[0].y, pDstPointsLeft[0].x),5,cv::Scalar(255,0,255),3,8,0);
+    // cv::circle(left_temp_af,cv::Point(pDstPointsLeft[1].y, pDstPointsLeft[1].x),5,cv::Scalar(255,0,255),3,8,0);
+    // cv::circle(left_temp_af,cv::Point(pDstPointsLeft[2].y, pDstPointsLeft[2].x),5,cv::Scalar(255,0,255),3,8,0);
+    // cv::circle(left_temp_af,cv::Point(pDstPointsLeft[3].y, pDstPointsLeft[3].x),5,cv::Scalar(255,0,255),3,8,0);
+
+    // cv::imshow("bf",left_temp_bf);
+    // cv::imshow("af",left_temp_af);
+    // cv::waitKey();
 
     // right side
     cv::Point2f pSrcPointsRight[] =

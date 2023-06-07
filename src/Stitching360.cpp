@@ -1,6 +1,7 @@
 #define _DLL_EXPORTS
 #include ".././include/Stitching360.h"
 #include <opencv2/imgproc/types_c.h>
+#include "opencv2/highgui.hpp"
 #include "opencv2/core/cuda.hpp"
 #include "opencv2/imgproc.hpp"
 #define front 0
@@ -48,7 +49,7 @@ int Stitching360::Init(int nSrcHeight, int nSrcWidth)
 	}
 	cv::Mat map1, map2;
 	cv::fisheye::initUndistortRectifyMap(m_mIntrinsicMatrix, m_vDistortionCoeffs, cv::Matx33d::eye(), m_mNewIntrinsicMat, m_szImage + cv::Size(200,200), CV_32FC1, map1, map2);
-	m_cmMap1.upload(map1);
+    m_cmMap1.upload(map1);
 	m_cmMap2.upload(map2);
     return 1;
 }
@@ -83,6 +84,14 @@ int Stitching360::findCorners()
 			/* Sub-pixel precision, refine the detected integer coordinate corner points, the refined points are stored in corners, the least square iteration is 100 times, the error is 0.001*/
 			cornerSubPix(imageGray, n_vCorners, cv::Size(11, 11), cv::Size(-1, -1), cv::TermCriteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 100, 0.001));
             std::cout << "Frame corner#" << i + 1 << "...end" << std::endl;
+
+            // /* to check n_vCorners of each images */
+            // cv::Mat temp;
+            // imageGray.copyTo(temp);
+            // for (int j=0; j<49; ++j)
+            // { cv::circle(temp,n_vCorners[j],5,cv::Scalar(255,0,255),3,8,0);  }
+            // cv::imshow("temp",temp);
+            // cv::waitKey();
 
 			count = count + n_vCorners.size();
 			m_nSuccessImageNum = m_nSuccessImageNum + 1;
