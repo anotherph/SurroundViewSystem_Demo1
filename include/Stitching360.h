@@ -16,14 +16,14 @@
 class SurroundView
 {
 public:
-    /************************相机标定以及矫正****************************/
+    /************************Camera Calibration and Correction****************************/
     virtual int Init(int nSrcHeight, int nSrcWidth) = 0;
     virtual cv::cuda::GpuMat Undistort(cv::cuda::GpuMat &mSrcImg) = 0;
 
-    /************************逆投影变换*******************************/
+    /************************back projection transformation*******************************/
     virtual cv::Mat PerspectiveTransform(cv::InputArray aInput, cv::Point2f *pSrcPoints, cv::Point2f *pDstPoints, cv::Size sOutputSize, int nOrientation) = 0;
 
-    /*************************图像拼接**********************************/
+    /*************************image stitching**********************************/
     virtual cv::Mat ImageStitching(int nWidth, int nHeight, cv::Mat aInputLeft, cv::Mat aInputRight, cv::Mat aInputFront, cv::Mat aInputBack,
         std::vector<cv::Point> vPtsInputLeft, std::vector<cv::Point> vPtsInputRight, std::vector<cv::Point> vPtsInputFront, std::vector<cv::Point> vPtsInputBack) = 0;
 
@@ -32,23 +32,23 @@ public:
 class Stitching360 :public SurroundView
 {
 private:
-    std::string                             m_sImageRoot;	/* ͼƬ�ļ��� */
-    std::string                             m_sLastName;    /* ͼƬ��׺�� */
-    std::string                             m_sCaliResult; /* ��궨���ݵ��ļ���*/
+    std::string                             m_sImageRoot;	        /* Image forder */
+    std::string                             m_sLastName;            /* Image extension */
+    std::string                             m_sCaliResult;          /* directory where the calibration data is stored*/
     cv::Size                                m_szImage;
-    cv::Size                                m_szBoard;	/****    �������ÿ�С��еĽǵ���       ****/
-    int                                     m_nImageCount;	/****    �궨ͼ������     ****/
-    int                                     m_nSuccessImageNum;                /****   �ɹ���ȡ�ǵ������ͼ����    ****/
-    cv::Matx33d                             m_mIntrinsicMatrix;    /*****    ������ڲ�������    ****/
-    cv::Matx33d                             m_mNewIntrinsicMat;   /** ����ͷ�µ��ڲ����ڽ��� **/
-    cv::Vec4d                               m_vDistortionCoeffs;     /* �������4������ϵ����k1,k2,k3,k4*/
-    std::vector<cv::Mat>                    m_vImageSeq;					/* ����ͼ�� */
-    std::vector<std::vector<cv::Point2f>>   m_vCornersSeq;    /****  �����⵽�����нǵ�       ****/
-    std::vector<cv::Point2f>                n_vCorners;                  /****    ����ÿ��ͼ���ϼ�⵽�Ľǵ�       ****/
-    std::vector<cv::Vec3d>                  m_vRotationVectors;                           /* ÿ��ͼ�����ת���� */
-    std::vector<cv::Vec3d>                  m_vTranslationVectors;                        /* ÿ��ͼ���ƽ������ */
-    cv::cuda::GpuMat                        m_cmMap1; /* ���ս�����ӳ��� */
-    cv::cuda::GpuMat                        m_cmMap2; /* ���ս�����ӳ��� */
+    cv::Size                                m_szBoard;	            /**** The number of corner points in each row and column on the calibration board       ****/
+    int                                     m_nImageCount;	        /**** Number of calibration images ****/
+    int                                     m_nSuccessImageNum;     /**** Number of checkerboard diagrams with successfully extracted corner points    ****/
+    cv::Matx33d                             m_mIntrinsicMatrix;     /**** Camera Intrinsic Parameter Matrix ****/
+    cv::Matx33d                             m_mNewIntrinsicMat;     /** The new internal parameters of the camera are used for correction **/
+    cv::Vec4d                               m_vDistortionCoeffs;    /* 4 distortion coefficients of the camera: k1,k2,k3,k4*/
+    std::vector<cv::Mat>                    m_vImageSeq;		    /* save image */
+    std::vector<std::vector<cv::Point2f>>   m_vCornersSeq;          /**** Save all detected corners ****/
+    std::vector<cv::Point2f>                n_vCorners;             /**** Cache the corners detected on each image ****/
+    std::vector<cv::Vec3d>                  m_vRotationVectors;     /* rotation vector for each image */
+    std::vector<cv::Vec3d>                  m_vTranslationVectors;  /* translation vector for each image */
+    cv::cuda::GpuMat                        m_cmMap1;               /* Final Corrected Mapping Table, the first output map */
+    cv::cuda::GpuMat                        m_cmMap2;               /* Final Corrected Mapping Table, the second output map */
 
     int findCorners();
     int cameraCalibrate(int count);
@@ -59,14 +59,14 @@ private:
 public:
     Stitching360();
     ~Stitching360();
-    /************************����궨�Լ�����****************************/
+    /************************Camera Calibration and Correction****************************/
     virtual int Init(int nSrcHeight, int nSrcWidth);
     virtual cv::cuda::GpuMat Undistort(cv::cuda::GpuMat &mSrcImg);
 
-    /************************��ͶӰ�任*******************************/
+    /************************back projection transformation*******************************/
     virtual cv::Mat PerspectiveTransform(cv::InputArray aInput, cv::Point2f *pSrcPoints, cv::Point2f *pDstPoints, cv::Size sOutputSize, int nOrientation);
 
-    /*************************ͼ��ƴ��**********************************/
+    /*************************image stitching**********************************/
     virtual cv::Mat ImageStitching(int nWidth, int nHeight, cv::Mat aInputLeft, cv::Mat aInputRight, cv::Mat aInputFront, cv::Mat aInputBack,
         std::vector<cv::Point> vPtsInputLeft, std::vector<cv::Point> vPtsInputRight, std::vector<cv::Point> vPtsInputFront, std::vector<cv::Point> vPtsInputBack);
 
